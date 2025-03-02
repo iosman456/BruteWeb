@@ -3,7 +3,7 @@ import subprocess
 import os
 import sys
 import time
-from spiderfoot import SpiderFoot, SpiderFootEvent, SpiderFootPlugin
+import requests
 
 def get_ip_address(domain):
     try:
@@ -49,22 +49,33 @@ def brute_force(ip_address, username, wordlist_path):
     print("Password not found.")
     sys.exit(1)
 
-def osint_scan(domain):
-    print(f"Starting OSINT scan on {domain}...")
-    sf = SpiderFoot(None)
-    sf.setup(None, dict())
-    sf.scan([domain], ['EMAILADDRESSES', 'PHONE', 'SOCIAL_MEDIA', 'HACKER_FORUMS'], None, SpiderFootPlugin.PLUGIN_TYPE_OSINT)
-    for event in sf.getEventQueue():
-        if event.eventType == SpiderFootEvent.EVENT_TYPE_ALERT:
-            print(f"Alert: {event.data}")
+def sherlock_search(username):
+    print(f"Searching for username: {username}")
+    social_media_sites = [
+        "https://www.facebook.com/{}",
+        "https://www.twitter.com/{}",
+        "https://www.instagram.com/{}",
+        "https://www.linkedin.com/in/{}",
+        "https://www.github.com/{}"
+        "https://www.tiktok.com/{}"
+        "https://www.instagram.com/{}"
+        "https://www.doxbin.com/{}"
+        "https://www.turkhackteam.com/{}"
+    ]
+    
+    for site in social_media_sites:
+        url = site.format(username)
+        response = requests.get(url)
+        if response.status_code == 200:
+            print(f"Found on {url}")
         else:
-            print(f"Info: {event.eventType}: {event.data}")
+            print(f"Not found on {url}")
 
 def main():
     print("Choose an option:")
     print("1. Brute Force")
     print("2. Web")
-    print("3. OSINT Scan")
+    print("3. Sherlock Search")
 
     choice = input("Enter your choice (1, 2, or 3): ")
 
@@ -91,8 +102,8 @@ def main():
             print(f"{domain}: Unable to find IP address")
 
     elif choice == '3':
-        domain = input("Please enter a domain: ")
-        osint_scan(domain)
+        username = input("Enter the username to search for: ")
+        sherlock_search(username)
 
     else:
         print("Invalid choice. Please enter 1, 2, or 3.")

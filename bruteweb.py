@@ -3,6 +3,7 @@ import subprocess
 import os
 import sys
 import time
+from spiderfoot import SpiderFoot, SpiderFootEvent, SpiderFootPlugin
 
 def get_ip_address(domain):
     try:
@@ -44,16 +45,28 @@ def brute_force(ip_address, username, wordlist_path):
                 print("Connection refused or timeout")
                 sys.exit(1)
             time.sleep(1)
-    
+
     print("Password not found.")
     sys.exit(1)
+
+def osint_scan(domain):
+    print(f"Starting OSINT scan on {domain}...")
+    sf = SpiderFoot(None)
+    sf.setup(None, dict())
+    sf.scan([domain], ['EMAILADDRESSES', 'PHONE', 'SOCIAL_MEDIA', 'HACKER_FORUMS'], None, SpiderFootPlugin.PLUGIN_TYPE_OSINT)
+    for event in sf.getEventQueue():
+        if event.eventType == SpiderFootEvent.EVENT_TYPE_ALERT:
+            print(f"Alert: {event.data}")
+        else:
+            print(f"Info: {event.eventType}: {event.data}")
 
 def main():
     print("Choose an option:")
     print("1. Brute Force")
     print("2. Web")
+    print("3. OSINT Scan")
 
-    choice = input("Enter your choice (1 or 2): ")
+    choice = input("Enter your choice (1, 2, or 3): ")
 
     if choice == '1':
         if len(sys.argv) != 4:
@@ -76,8 +89,13 @@ def main():
             print(f"{domain}: {ip_address}")
         else:
             print(f"{domain}: Unable to find IP address")
+
+    elif choice == '3':
+        domain = input("Please enter a domain: ")
+        osint_scan(domain)
+
     else:
-        print("Invalid choice. Please enter 1 or 2.")
+        print("Invalid choice. Please enter 1, 2, or 3.")
         sys.exit(1)
 
 if __name__ == '__main__':

@@ -49,35 +49,12 @@ def brute_force(ip_address, username, wordlist_path):
     print("Password not found.")
     sys.exit(1)
 
-def sherlock_search(username):
-    print(f"Searching for username: {username}")
-    social_media_sites = [
-        "https://www.facebook.com/{}",
-        "https://www.twitter.com/{}",
-        "https://www.instagram.com/{}",
-        "https://www.linkedin.com/in/{}",
-        "https://www.github.com/{}"
-        "https://www.tiktok.com/{}"
-        "https://www.instagram.com/{}"
-        "https://www.doxbin.com/{}"
-        "https://www.turkhackteam.com/{}"
-    ]
-    
-    for site in social_media_sites:
-        url = site.format(username)
-        response = requests.get(url)
-        if response.status_code == 200:
-            print(f"Found on {url}")
-        else:
-            print(f"Not found on {url}")
-
 def main():
     print("Choose an option:")
     print("1. Brute Force")
     print("2. Web")
-    print("3. Sherlock Search")
 
-    choice = input("Enter your choice (1, 2, or 3): ")
+    choice = input("Enter your choice (1 or 2): ")
 
     if choice == '1':
         if len(sys.argv) != 4:
@@ -101,12 +78,8 @@ def main():
         else:
             print(f"{domain}: Unable to find IP address")
 
-    elif choice == '3':
-        username = input("Enter the username to search for: ")
-        sherlock_search(username)
-
     else:
-        print("Invalid choice. Please enter 1, 2, or 3.")
+        print("Invalid choice. Please enter 1 or 2.")
         sys.exit(1)
 
 if __name__ == '__main__':

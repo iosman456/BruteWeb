@@ -13,14 +13,12 @@ import json
 logging.basicConfig(filename='bruteforce_success.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
-
 def get_ip_address(domain):
     try:
         ip_address = socket.gethostbyname(domain)
         return ip_address
     except socket.gaierror:
         return None
-
 
 def get_domain_info(domain):
     try:
@@ -29,7 +27,6 @@ def get_domain_info(domain):
     except Exception as e:
         return str(e)
 
-
 def get_server_info(ip_address):
     try:
         response = requests.get(f"https://ipinfo.io/{ip_address}/json")
@@ -37,12 +34,10 @@ def get_server_info(ip_address):
     except requests.RequestException as e:
         return str(e)
 
-
 def prompt_for_input():
     domain = input("Please enter a domain: ")
     username = input("Enter Username: ")
     return domain, username
-
 
 def generate_passwords(filename, count=10000, length=8):
     characters = string.ascii_letters + string.digits
@@ -50,7 +45,6 @@ def generate_passwords(filename, count=10000, length=8):
         for _ in range(count):
             password = ''.join(random.choice(characters) for _ in range(length))
             f.write(password + '\n')
-
 
 def brute_force(ip_address, username, wordlist_path):
     if not os.path.isfile(wordlist_path):
@@ -81,7 +75,6 @@ def brute_force(ip_address, username, wordlist_path):
     print("Password not found.")
     sys.exit(1)
 
-
 def save_to_json(domain, domain_info, server_info):
     data = {
         'domain': domain,
@@ -91,13 +84,56 @@ def save_to_json(domain, domain_info, server_info):
     with open('protecth.json', 'w') as json_file:
         json.dump(data, json_file, indent=2)
 
+def sherlock_like_osint(username):
+    urls = {
+        "Twitter": f"https://twitter.com/{username}",
+        "Facebook": f"https://www.facebook.com/{username}",
+        "Instagram": f"https://www.instagram.com/{username}",
+        "Pinterest": f"https://www.pinterest.com/{username}",
+        "GitHub": f"https://www.github.com/{username}",
+        "Reddit": f"https://www.reddit.com/user/{username}",
+        "LinkedIn": f"https://www.linkedin.com/in/{username}",
+        "Tumblr": f"https://{username}.tumblr.com",
+        "Flickr": f"https://www.flickr.com/people/{username}",
+        "Medium": f"https://medium.com/@{username}",
+        "Vimeo": f"https://vimeo.com/{username}",
+        "YouTube": f"https://www.youtube.com/{username}",
+        "TikTok": f"https://www.tiktok.com/@{username}",
+        "WordPress": f"https://{username}.wordpress.com",
+        "Blogspot": f"https://{username}.blogspot.com",
+        "DeviantArt": f"https://{username}.deviantart.com",
+        "SoundCloud": f"https://soundcloud.com/{username}",
+        "Spotify": f"https://open.spotify.com/user/{username}",
+        "Steam": f"https://steamcommunity.com/id/{username}",
+        "Quora": f"https://www.quora.com/profile/{username}",
+        "AngelList": f"https://angel.co/{username}",
+        "Flipboard": f"https://flipboard.com/@{username}",
+        "HackerRank": f"https://www.hackerrank.com/{username}",
+        "Last.fm": f"https://www.last.fm/user/{username}",
+        "MySpace": f"https://myspace.com/{username}",
+        "About.me": f"https://about.me/{username}",
+        "BuzzFeed": f"https://buzzfeed.com/{username}"
+    }
+    results = {}
+    for platform, url in urls.items():
+        try:
+            response = requests.get(url)
+            if response.status_code == 200:
+                results[platform] = f"Found: {url}"
+            else:
+                results[platform] = f"Not Found: {url}"
+        except requests.ConnectionError:
+            results[platform] = f"Error connecting: {url}"
+        time.sleep(1)  # Adding 1-second delay between each search
+    return results
 
 def main():
     print("Choose an option:")
     print("1. Brute Force")
     print("2. Web")
+    print("3. OSINT (Sherlock-like)")
 
-    choice = input("Enter your choice (1 or 2): ")
+    choice = input("Enter your choice (1, 2 or 3): ")
 
     if choice == '1':
         domain, username = prompt_for_input()
@@ -122,10 +158,15 @@ def main():
         else:
             print(f"{domain}: Unable to find IP address")
 
-    else:
-        print("Invalid choice. Please enter 1 or 2.")
-        sys.exit(1)
+    elif choice == '3':
+        username = input("Please enter a username: ")
+        osint_results = sherlock_like_osint(username)
+        for platform, result in osint_results.items():
+            print(result)
 
+    else:
+        print("Invalid choice. Please enter 1, 2 or 3.")
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()

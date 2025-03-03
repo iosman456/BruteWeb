@@ -73,7 +73,7 @@ def main():
 
     if choice == '1':
         domain, username = prompt_for_input()
-        wordlist_path = 'rockyou.txt'
+        wordlist_path = f'{username}_rockyou.txt'
         generate_passwords(wordlist_path)
 
         ip_address = get_ip_address(domain)

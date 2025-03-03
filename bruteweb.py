@@ -50,7 +50,7 @@ def brute_force(ip_address, username, wordlist_path):
     if not os.path.isfile(wordlist_path):
         print("Error: Wordlist file not found!")
         sys.exit(1)
-    elif not os.access(wordlist_path, os.R_OK):
+    elif not os.access(wordlist_path, os.R.OK):
         print("Error: Wordlist file is not readable!")
         sys.exit(1)
 
@@ -84,12 +84,26 @@ def save_to_json(domain, domain_info, server_info):
     with open('protecth.json', 'w') as json_file:
         json.dump(data, json_file, indent=2)
 
+def sqlmap_scan(url):
+    if subprocess.run(["which", "sqlmap"], stdout=subprocess.PIPE, stderr=subprocess.PIPE).returncode != 0:
+        print("Error: sqlmap is not installed. Please install it and try again.")
+        sys.exit(1)
+
+    print(f"Running sqlmap on {url}")
+    result = subprocess.run(["sqlmap", "-u", url, "--batch"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    print(result.stdout.decode())
+    if result.returncode != 0:
+        print("sqlmap scan completed with errors.")
+    else:
+        print("sqlmap scan completed successfully.")
+
 def main():
     print("Choose an option:")
     print("1. Brute Force")
     print("2. Web")
+    print("3. SQL Injection Test")
 
-    choice = input("Enter your choice (1 or 2): ")
+    choice = input("Enter your choice (1, 2 or 3): ")
 
     if choice == '1':
         domain, username = prompt_for_input()
@@ -114,8 +128,12 @@ def main():
         else:
             print(f"{domain}: Unable to find IP address")
 
+    elif choice == '3':
+        url = input("Please enter a URL to test for SQL injection: ")
+        sqlmap_scan(url)
+
     else:
-        print("Invalid choice. Please enter 1 or 2.")
+        print("Invalid choice. Please enter 1, 2 or 3.")
         sys.exit(1)
 
 if __name__ == '__main__':

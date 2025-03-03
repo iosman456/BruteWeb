@@ -96,11 +96,10 @@ def save_to_json(domain, domain_info, server_info):
 
 
 def get_twitter_info(username):
-    # Twitter API anahtarlarınızı ve token'larınızı buraya ekleyin
-    consumer_key = 'YOUR_CONSUMER_KEY'
-    consumer_secret = 'YOUR_CONSUMER_SECRET'
-    access_token = 'YOUR_ACCESS_TOKEN'
-    access_token_secret = 'YOUR_ACCESS_TOKEN_SECRET'
+    consumer_key = input("Enter your Twitter consumer key: ")
+    consumer_secret = input("Enter your Twitter consumer secret: ")
+    access_token = input("Enter your Twitter access token: ")
+    access_token_secret = input("Enter your Twitter access token secret: ")
 
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_token_secret)
@@ -139,7 +138,8 @@ def get_instagram_info(username):
 
 
 def get_tiktok_info(username):
-    api = TikTokApi()
+    api_key = input("Enter your TikTok API key: ")
+    api = TikTokApi(api_key)
     try:
         user = api.get_user(username)
         user_info = {

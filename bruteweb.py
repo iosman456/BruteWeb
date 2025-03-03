@@ -10,6 +10,8 @@ import string
 import whois
 import json
 import tweepy
+import instaloader
+from TikTokApi import TikTokApi
 
 logging.basicConfig(filename='bruteforce_success.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -120,6 +122,40 @@ def get_twitter_info(username):
         return str(e)
 
 
+def get_instagram_info(username):
+    loader = instaloader.Instaloader()
+    try:
+        profile = instaloader.Profile.from_username(loader.context, username)
+        user_info = {
+            'name': profile.full_name,
+            'followers': profile.followers,
+            'following': profile.followees,
+            'posts': profile.mediacount,
+            'biography': profile.biography
+        }
+        return user_info
+    except Exception as e:
+        return str(e)
+
+
+def get_tiktok_info(username):
+    api = TikTokApi()
+    try:
+        user = api.get_user(username)
+        user_info = {
+            'unique_id': user['uniqueId'],
+            'nickname': user['nickname'],
+            'signature': user['signature'],
+            'followers': user['followerCount'],
+            'following': user['followingCount'],
+            'likes': user['heart'],
+            'videos': user['videoCount']
+        }
+        return user_info
+    except Exception as e:
+        return str(e)
+
+
 def main():
     print("Choose an option:")
     print("1. Brute Force")
@@ -152,9 +188,18 @@ def main():
             print(f"{domain}: Unable to find IP address")
 
     elif choice == '3':
-        username = input("Please enter a Twitter username: ")
-        twitter_info = get_twitter_info(username)
-        print(f"Twitter Info: {json.dumps(twitter_info, indent=2)}")
+        platform = input("Choose a platform (Twitter, Instagram, TikTok): ").lower()
+        username = input("Please enter a username: ")
+        if platform == 'twitter':
+            info = get_twitter_info(username)
+        elif platform == 'instagram':
+            info = get_instagram_info(username)
+        elif platform == 'tiktok':
+            info = get_tiktok_info(username)
+        else:
+            print("Invalid platform choice.")
+            sys.exit(1)
+        print(f"{platform.capitalize()} Info: {json.dumps(info, indent=2)}")
     
     else:
         print("Invalid choice. Please enter 1, 2 or 3.")

@@ -81,6 +81,14 @@ def brute_force(ip_address, username, wordlist_path):
     print("Password not found.")
     sys.exit(1)
 
+def save_to_json(domain, domain_info, server_info):
+    data = {
+        'domain': domain,
+        'domain_info': domain_info,
+        'server_info': server_info
+    }
+    with open('protecth.json', 'w') as json_file:
+        json.dump(data, json_file, indent=2)
 
 def main():
     print("Choose an option:")
@@ -110,6 +118,7 @@ def main():
             server_info = get_server_info(ip_address)
             print(f"Domain Info: {domain_info}")
             print(f"Server Info: {json.dumps(server_info, indent=2)}")
+            save_to_json(domain, domain_info, server_info)  # Save information to JSON file
         else:
             print(f"{domain}: Unable to find IP address")
 

@@ -9,6 +9,7 @@ import random
 import string
 import whois
 import json
+import tweepy
 
 logging.basicConfig(filename='bruteforce_success.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -81,6 +82,7 @@ def brute_force(ip_address, username, wordlist_path):
     print("Password not found.")
     sys.exit(1)
 
+
 def save_to_json(domain, domain_info, server_info):
     data = {
         'domain': domain,
@@ -90,23 +92,50 @@ def save_to_json(domain, domain_info, server_info):
     with open('protecth.json', 'w') as json_file:
         json.dump(data, json_file, indent=2)
 
+
+def get_twitter_info(username):
+    # Twitter API anahtarlarınızı ve token'larınızı buraya ekleyin
+    consumer_key = 'YOUR_CONSUMER_KEY'
+    consumer_secret = 'YOUR_CONSUMER_SECRET'
+    access_token = 'YOUR_ACCESS_TOKEN'
+    access_token_secret = 'YOUR_ACCESS_TOKEN_SECRET'
+
+    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token(access_token, access_token_secret)
+    
+    api = tweepy.API(auth)
+    
+    try:
+        user = api.get_user(screen_name=username)
+        tweets = api.user_timeline(screen_name=username, count=10)
+        user_info = {
+            'name': user.name,
+            'description': user.description,
+            'location': user.location,
+            'followers_count': user.followers_count,
+            'tweets': [tweet.text for tweet in tweets]
+        }
+        return user_info
+    except Exception as e:
+        return str(e)
+
+
 def main():
     print("Choose an option:")
     print("1. Brute Force")
     print("2. Web")
+    print("3. Social OSINT")
 
-    choice = input("Enter your choice (1 or 2): ")
+    choice = input("Enter your choice (1, 2 or 3): ")
 
     if choice == '1':
         domain, username = prompt_for_input()
         wordlist_path = f'{username}_rockyou.txt'
         generate_passwords(wordlist_path)
-
         ip_address = get_ip_address(domain)
         if not ip_address:
             print(f"{domain}: Unable to find IP address")
             sys.exit(1)
-
         brute_force(ip_address, username, wordlist_path)
 
     elif choice == '2':
@@ -118,12 +147,17 @@ def main():
             server_info = get_server_info(ip_address)
             print(f"Domain Info: {domain_info}")
             print(f"Server Info: {json.dumps(server_info, indent=2)}")
-            save_to_json(domain, domain_info, server_info)  # Save information to JSON file
+            save_to_json(domain, domain_info, server_info)
         else:
             print(f"{domain}: Unable to find IP address")
 
+    elif choice == '3':
+        username = input("Please enter a Twitter username: ")
+        twitter_info = get_twitter_info(username)
+        print(f"Twitter Info: {json.dumps(twitter_info, indent=2)}")
+    
     else:
-        print("Invalid choice. Please enter 1 or 2.")
+        print("Invalid choice. Please enter 1, 2 or 3.")
         sys.exit(1)
 
 

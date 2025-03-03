@@ -7,6 +7,8 @@ import requests
 import logging
 import random
 import string
+import whois
+import json
 
 logging.basicConfig(filename='bruteforce_success.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -18,6 +20,22 @@ def get_ip_address(domain):
         return ip_address
     except socket.gaierror:
         return None
+
+
+def get_domain_info(domain):
+    try:
+        domain_info = whois.whois(domain)
+        return domain_info
+    except Exception as e:
+        return str(e)
+
+
+def get_server_info(ip_address):
+    try:
+        response = requests.get(f"https://ipinfo.io/{ip_address}/json")
+        return response.json()
+    except requests.RequestException as e:
+        return str(e)
 
 
 def prompt_for_input():
@@ -88,6 +106,10 @@ def main():
         ip_address = get_ip_address(domain)
         if ip_address:
             print(f"{domain}: {ip_address}")
+            domain_info = get_domain_info(domain)
+            server_info = get_server_info(ip_address)
+            print(f"Domain Info: {domain_info}")
+            print(f"Server Info: {json.dumps(server_info, indent=2)}")
         else:
             print(f"{domain}: Unable to find IP address")
 

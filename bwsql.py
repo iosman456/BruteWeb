@@ -11,8 +11,7 @@ import whois
 import json
 import threading
 
-logging.basicConfig(filename='bruteforce_success.log', level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename='bruteforce_success.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def get_ip_address(domain):
     try:
@@ -51,7 +50,7 @@ def brute_force(ip_address, username, wordlist_path):
     if not os.path.isfile(wordlist_path):
         print("Error: Wordlist file not found!")
         sys.exit(1)
-    elif not os.access(wordlist_path, os.R.OK):
+    elif not os.access(wordlist_path, os.R_OK):
         print("Error: Wordlist file is not readable!")
         sys.exit(1)
 
@@ -154,74 +153,79 @@ def dos_attack(url, rate_limit=10, delay_range=(1, 3)):
     attack_thread.start()
 
 def main():
-    print("Choose an option:")
-    print("1. Brute Force")
-    print("2. Web")
-    print("3. SQL")
-    print("4. DDoS Attack")
-    print("5. DoS Attack")
+    while True:
+        print("Choose an option:")
+        print("1. Brute Force")
+        print("2. Web")
+        print("3. SQL")
+        print("4. DDoS Attack")
+        print("5. DoS Attack")
+        print("6. Exit")
 
-    choice = input("Enter your choice (1, 2, 3, 4 or 5): ")
+        choice = input("Enter your choice (1, 2, 3, 4, 5 or 6): ")
 
-    if choice == '1':
-        domain, username = prompt_for_input()
-        wordlist_path = f'{username}_rockyou.txt'
-        generate_passwords(wordlist_path)
-        ip_address = get_ip_address(domain)
-        if not ip_address:
-            print(f"{domain}: Unable to find IP address")
-            sys.exit(1)
-        brute_force(ip_address, username, wordlist_path)
+        if choice == '1':
+            domain, username = prompt_for_input()
+            wordlist_path = f'{username}_rockyou.txt'
+            generate_passwords(wordlist_path)
+            ip_address = get_ip_address(domain)
+            if not ip_address:
+                print(f"{domain}: Unable to find IP address")
+                sys.exit(1)
+            brute_force(ip_address, username, wordlist_path)
 
-    elif choice == '2':
-        domain = input("Please enter a domain: ")
-        ip_address = get_ip_address(domain)
-        if ip_address:
-            print(f"{domain}: {ip_address}")
-            domain_info = get_domain_info(domain)
-            server_info = get_server_info(ip_address)
-            print(f"Domain Info: {domain_info}")
-            print(f"Server Info: {json.dumps(server_info, indent=2)}")
-            save_to_json(domain, domain_info, server_info)
-        else:
-            print(f"{domain}: Unable to find IP address")
-
-    elif choice == '3':
-        scan_choice = input("Choose a scan type: (1) nmap, (2) nikto, (3) wpscan, (4) sqlmap: ")
-        if scan_choice == '1':
+        elif choice == '2':
             domain = input("Please enter a domain: ")
             ip_address = get_ip_address(domain)
             if ip_address:
-                nmap_scan(ip_address)
+                print(f"{domain}: {ip_address}")
+                domain_info = get_domain_info(domain)
+                server_info = get_server_info(ip_address)
+                print(f"Domain Info: {domain_info}")
+                print(f"Server Info: {json.dumps(server_info, indent=2)}")
+                save_to_json(domain, domain_info, server_info)
             else:
                 print(f"{domain}: Unable to find IP address")
-        elif scan_choice == '2':
-            url = input("Please enter a URL to scan with nikto: ")
-            nikto_scan(url)
-        elif scan_choice == '3':
-            url = input("Please enter a URL to scan with wpscan: ")
-            wpscan(url)
-        elif scan_choice == '4':
-            url = input("Please enter a URL to scan with sqlmap: ")
-            sqlmap_scan(url)
+
+        elif choice == '3':
+            scan_choice = input("Choose a scan type: (1) nmap, (2) nikto, (3) wpscan, (4) sqlmap: ")
+            if scan_choice == '1':
+                domain = input("Please enter a domain: ")
+                ip_address = get_ip_address(domain)
+                if ip_address:
+                    nmap_scan(ip_address)
+                else:
+                    print(f"{domain}: Unable to find IP address")
+            elif scan_choice == '2':
+                url = input("Please enter a URL to scan with nikto: ")
+                nikto_scan(url)
+            elif scan_choice == '3':
+                url = input("Please enter a URL to scan with wpscan: ")
+                wpscan(url)
+            elif scan_choice == '4':
+                url = input("Please enter a URL to scan with sqlmap: ")
+                sqlmap_scan(url)
+            else:
+                print("Invalid scan type choice.")
+                sys.exit(1)
+
+        elif choice == '4':
+            url = input("Please enter a URL to attack: ")
+            threads = int(input("Enter number of threads: "))
+            ddos_attack(url, threads)
+
+        elif choice == '5':
+            url = input("Please enter a URL to attack: ")
+            rate_limit = int(input("Enter rate limit in seconds: "))
+            delay_range = (int(input("Enter minimum delay in seconds: ")), int(input("Enter maximum delay in seconds: ")))
+            dos_attack(url, rate_limit, delay_range)
+
+        elif choice == '6':
+            print("Exiting...")
+            sys.exit(0)
+
         else:
-            print("Invalid scan type choice.")
-            sys.exit(1)
-
-    elif choice == '4':
-        url = input("Please enter a URL to attack: ")
-        threads = int(input("Enter number of threads: "))
-        ddos_attack(url, threads)
-
-    elif choice == '5':
-        url = input("Please enter a URL to attack: ")
-        rate_limit = int(input("Enter rate limit in seconds: "))
-        delay_range = (int(input("Enter minimum delay in seconds: ")), int(input("Enter maximum delay in seconds: ")))
-        dos_attack(url, rate_limit, delay_range)
-
-    else:
-        print("Invalid choice. Please enter 1, 2, 3, 4 or 5.")
-        sys.exit(1)
+            print("Invalid choice. Please enter 1, 2, 3, 4, 5 or 6.")
 
 if __name__ == '__main__':
     main()

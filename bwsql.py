@@ -84,24 +84,38 @@ def save_to_json(domain, domain_info, server_info):
     with open('protecth.json', 'w') as json_file:
         json.dump(data, json_file, indent=2)
 
-def sqlmap_scan(url):
-    if subprocess.run(["which", "sqlmap"], stdout=subprocess.PIPE, stderr=subprocess.PIPE).returncode != 0:
-        print("Error: sqlmap is not installed. Please install it and try again.")
-        sys.exit(1)
-
-    print(f"Running sqlmap on {url}")
-    result = subprocess.run(["sqlmap", "-u", url, "--batch"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+def nmap_scan(ip_address):
+    print(f"Running nmap scan on {ip_address}")
+    result = subprocess.run(["nmap", "-sV", ip_address], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     print(result.stdout.decode())
     if result.returncode != 0:
-        print("sqlmap scan completed with errors.")
+        print("nmap scan completed with errors.")
     else:
-        print("sqlmap scan completed successfully.")
+        print("nmap scan completed successfully.")
+
+def nikto_scan(url):
+    print(f"Running nikto scan on {url}")
+    result = subprocess.run(["nikto", "-h", url], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    print(result.stdout.decode())
+    if result.returncode != 0:
+        print("nikto scan completed with errors.")
+    else:
+        print("nikto scan completed successfully.")
+
+def wpscan(url):
+    print(f"Running wpscan on {url}")
+    result = subprocess.run(["wpscan", "--url", url, "--disable-tls-checks"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    print(result.stdout.decode())
+    if result.returncode != 0:
+        print("wpscan completed with errors.")
+    else:
+        print("wpscan completed successfully.")
 
 def main():
     print("Choose an option:")
     print("1. Brute Force")
     print("2. Web")
-    print("3. SQL Injection Test")
+    print("3. Ethical Hacking")
 
     choice = input("Enter your choice (1, 2 or 3): ")
 
@@ -129,8 +143,23 @@ def main():
             print(f"{domain}: Unable to find IP address")
 
     elif choice == '3':
-        url = input("Please enter a URL to test for SQL injection: ")
-        sqlmap_scan(url)
+        scan_choice = input("Choose a scan type: (1) nmap, (2) nikto, (3) wpscan: ")
+        if scan_choice == '1':
+            domain = input("Please enter a domain: ")
+            ip_address = get_ip_address(domain)
+            if ip_address:
+                nmap_scan(ip_address)
+            else:
+                print(f"{domain}: Unable to find IP address")
+        elif scan_choice == '2':
+            url = input("Please enter a URL to scan with nikto: ")
+            nikto_scan(url)
+        elif scan_choice == '3':
+            url = input("Please enter a URL to scan with wpscan: ")
+            wpscan(url)
+        else:
+            print("Invalid scan type choice.")
+            sys.exit(1)
 
     else:
         print("Invalid choice. Please enter 1, 2 or 3.")

